@@ -22,10 +22,11 @@ class Nav_server{
     ros::ServiceServer test_server;
     ros::Subscriber action_result_sub;
     std::string MAP_FRAME , BASE_FOOT_PRINT;
+    std::string JSON_FILE;
     void actionResultCallback(const actionlib_msgs::GoalStatusArray::ConstPtr &msg);
     bool isArrival(const geometry_msgs::Pose2D &goal2d);
 public:
-    Nav_server(ros::NodeHandle &nh_, const std::string& base_foot_print, std::string map_frame);
+    Nav_server(ros::NodeHandle &nh_, const std::string& base_foot_print, std::string map_frame, std::string json_file);
     ~Nav_server();
 };
 void Nav_server::actionResultCallback(const actionlib_msgs::GoalStatusArray::ConstPtr &msg)
@@ -52,7 +53,12 @@ void Nav_server::readPoseFromJson(std::string type)
     // std::cout<<"in nav_server!!"<< type <<std::endl;
 	Json::Reader reader;/*用于按照JSON数据格式进行解析*/
 	Json::Value root;/*用于保存JSON类型的一段数据*/
-	std::ifstream srcFile("/home/hpf/ICRA_PUB/src/Mapping/config/target_map.json", std::ios::binary);/*定义一个ifstream流对象，与文件demo.json进行关联*/
+
+	// std::ifstream srcFile("~/ICRA_PUB/src/Mapping/config/target_map.json", std::ios::binary);/*定义一个ifstream流对象，与文件demo.json进行关联*/
+    
+    std::ifstream srcFile(JSON_FILE, std::ios::binary);
+    
+    // std::ifstream srcFile("/home/hpf/ICRA_PUB/src/Mapping/config/target_map.json", std::ios::binary);
 	if (!srcFile.is_open())
 	{
 		std::cout << "Fail to open target_map.json" << std::endl;
@@ -127,13 +133,14 @@ navigation::nav_srv::Response& resp){
     return true;
 }
 
-Nav_server::Nav_server(ros::NodeHandle &nh_, const std::string& base_foot_link, std::string map_frame){
+Nav_server::Nav_server(ros::NodeHandle &nh_, const std::string& base_foot_link, std::string map_frame, std::string json_file){
     
     // target_type.push_back("shopping");
     // target_type.push_back("cooking");
     // target_type.push_back("serving");
     // std::cout<<"hi!!"<< target_type[0] <<std::endl;
     // Nav nav(base_foot_print, map_frame, serial_addr, file_name);
+    JSON_FILE = json_file;
     MAP_FRAME = map_frame;
     BASE_FOOT_PRINT =base_foot_link;
     for(int i = 0; i < 3; i++){
@@ -178,10 +185,12 @@ int main(int argc, char *argv[])
 {
     ros::init(argc,argv,"nav_server");
     ros::NodeHandle nh;
-    std::string base_foot_print, odom_frame, map_frame, serial_addr, file_name;
+    std::string base_foot_print, odom_frame, map_frame, serial_addr, file_name, json_file;
     nh.param("base_foot_print",base_foot_print,(std::string)"base_link");
     nh.param("map_frame",map_frame,(std::string)"3dmap");
-    Nav_server nav_server(nh, base_foot_print, map_frame);
+    nh.param("json_file",json_file,(std::string)"/home111/hpf/ICRA_PUB/src/Mapping/config/target_map.json");
+   
+    Nav_server nav_server(nh, base_foot_print, map_frame, json_file);
     ROS_INFO("导航服务已经启动....");
     ros::spin();
 }

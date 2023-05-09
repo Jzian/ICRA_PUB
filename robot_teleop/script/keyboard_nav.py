@@ -5,7 +5,7 @@ from __future__ import print_function
 import threading
 
 import rospy
-
+import os
 from geometry_msgs.msg import TransformStamped, Pose2D
 import tf2_ros
 # from tf_conversions import transformations
@@ -222,6 +222,8 @@ if __name__=="__main__":
     th = 0
     status = 0
 
+    dir_pa = os.path.abspath(os.path.dirname(os.getcwd()))
+    dir_json = os.path.join(dir_pa,"ICRA_PUB/src/Mapping/config/target_map.json")
     try:
         pub_thread.wait_for_subscribers()
         pub_thread.update(x, y, z, th, speed, turn)
@@ -252,7 +254,8 @@ if __name__=="__main__":
                     pub_thread.target_map["shopping"][0] = pose.x
                     pub_thread.target_map["shopping"][1] = pose.y
                     pub_thread.target_map["shopping"][2] = pose.theta
-                    with open("/home/hpf/ICRA_PUB/src/Mapping/config/target_map.json","w") as f:
+
+                    with open(dir_json,"w") as f:
                         json.dump(pub_thread.target_map, f)
                     # pose = Pose()
                     # pose.position.x = 0.19
@@ -262,13 +265,13 @@ if __name__=="__main__":
                     pub_thread.target_map["cooking"][0] = pose.x
                     pub_thread.target_map["cooking"][1] = pose.y
                     pub_thread.target_map["cooking"][2] = pose.theta
-                    with open("/home/hpf/ICRA_PUB/src/Mapping/config/target_map.json","w") as f:
+                    with open(dir_json,"w") as f:
                         json.dump(pub_thread.target_map, f)
                 elif key == '3':
                     pub_thread.target_map["serving"][0] = pose.x
                     pub_thread.target_map["serving"][1] = pose.y
                     pub_thread.target_map["serving"][2] = pose.theta
-                    with open("/home/hpf/ICRA_PUB/src/Mapping/config/target_map.json","w") as f:
+                    with open(dir_json,"w") as f:
                         json.dump(pub_thread.target_map, f)
                 elif key == '4':
                     point = Point()

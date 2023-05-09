@@ -4,6 +4,7 @@
     <arg name="serial_addr" default="/dev/ttyS1" />
     <arg name="localization" default="true" />
     <arg name="rviz" default="true" />
+    <arg name="json_file" default="$(find mapping)/config/target_map.json" />
 
     <!-- <include file="/home/hpf/ARX5/ros/src/arx5/arx5_moveit/launch/arx5_moveit.launch" />  -->
     
@@ -28,6 +29,7 @@
     <node pkg="navigation" type="navi_service" name="navi_service" output="screen" />
         <param name="base_foot_print" value="$(arg base_foot_print)" />
         <param name="map_frame" value="$(arg map_frame)" />
+        <param name="json_file" value="$(arg json_file)" />
 
     <node pkg="robot_teleop" type="keyboard_nav.py" name="teleop_twist_keyboard_nav_node" /> 
     
