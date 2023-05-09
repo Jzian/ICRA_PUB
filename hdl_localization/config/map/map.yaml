@@ -1,0 +1,11 @@
+image: /home/hpf/ICRA_PUB/src/hdl_localization/config/map/map.pgm
+resolution: 0.050000
+<<<<<<< HEAD
+origin: [-5.714215, -5.944036, 0.000000]
+=======
+origin: [-1.676737, -1.902069, 0.000000]
+>>>>>>> aa8ddb5fd2d875ef5af4361df4923b3f712808cc
+negate: 0
+occupied_thresh: 0.65
+free_thresh: 0.196
+

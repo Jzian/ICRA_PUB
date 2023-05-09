@@ -1,0 +1,7 @@
+{
+    "python.autoComplete.extraPaths": [
+        "/home/jzian/WorkSpace/ICRA_R_PUB_test/devel/lib/python3/dist-packages",
+        "/home/jzian/BuildSpace/livox_ros_driver/devel/lib/python3/dist-packages",
+        "/opt/ros/noetic/lib/python3/dist-packages"
+    ]
+}
