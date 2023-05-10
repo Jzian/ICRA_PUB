@@ -6,7 +6,7 @@ NavCore::NavCore(std::string base_foot_print,std::string map_frame):BASE_FOOT_PR
     tfListener_ = new tf2_ros::TransformListener(tfBuffer_);
 
     moveBaseClient = new MoveBaseClient("move_base",true);
-    moveBaseClient->waitForServer(ros::Duration(4.0));
+    moveBaseClient->waitForServer(ros::Duration(6.0));
 
     if(!(isMoveBaseClientConnected_ = moveBaseClient->isServerConnected()))
         ROS_ERROR_STREAM("MoveBase ActionServer Failed");
@@ -48,6 +48,8 @@ NavCore::~NavCore()
 //     }
 // }
 
+
+
 void NavCore::actionResultCallback(const move_base_msgs::MoveBaseActionResult &msg)
 // void NavCore::actionResultCallback(const actionlib_msgs::GoalStatusArray::ConstPtr &msg)
 {
@@ -63,7 +65,7 @@ void NavCore::actionResultCallback(const move_base_msgs::MoveBaseActionResult &m
         case move_base_msgs::MoveBaseActionResult::_status_type::PREEMPTED:
             moveBaseActionResult_ = MoveBaseActionResult::PREEMPTED;
             break;
-        // case move_base_msgs::MoveBaseActionResult::_status_type::SUCCEEDED:
+        case move_base_msgs::MoveBaseActionResult::_status_type::SUCCEEDED:
             moveBaseActionResult_ = MoveBaseActionResult::SUCCEEDED;
             break;
         case move_base_msgs::MoveBaseActionResult::_status_type::ABORTED:

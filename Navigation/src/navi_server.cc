@@ -38,7 +38,7 @@ void Nav_server::actionResultCallback(const actionlib_msgs::GoalStatusArray::Con
         if (status.status ==3)
         {
             navCore->moveBaseActionResult_ = NavCore::MoveBaseActionResult::SUCCEEDED;
-            // ROS_INFO("MoveBase status: Goal succeeded");
+            ROS_INFO("MoveBase status: Goal succeeded");
         }
     }
     // std::cout<<"resullllllllllllllt<"<<msg.status.status<<std::endl;
@@ -101,19 +101,39 @@ navigation::nav_srv::Response& resp){
     ROS_INFO("<<<<<<<<<<<<<<<<<<<<<<<<<in service call");
     ros::Rate loop_rate(30);
     int type = req.tar_type;
-    navCore->setGoal(target_pose[type].pose); 
+
+
+    // if (type == 9){
+    //     ROS_INFO("in nav 9");
+    //     geometry_msgs::Pose2D pose_ori;
+        
+    //     pose_ori.x = 0;
+    //     pose_ori.y = 0;
+    //     navCore->setGoal(pose_ori);
+    //     loop_rate.sleep();
+    //     resp.nav_flag = true;
+    //     return true;
+    // }
+    // else{
+    //     navCore->setGoal(target_pose[type].pose);
+    //     ROS_INFO("Set pose to x:%d y:%d th:%d:", target_pose[type].pose.x, target_pose[type].pose.y, target_pose[type].pose.theta);
+    // }
     // if (type == 2){
     //     if (chdir("/home/hpf/wukong-robot") != 0) {
     //         std::cerr << "Error changing directory" << std::endl;
     //     }
     //     system("./start.sh");
     // }
+    navCore->setGoal(target_pose[type].pose);
     bool flag =false;
     while( ros::ok() ){
-        // geometry_msgs::Pose2D currentpose;
-        // currentpose = navCore->getCurrentPose(MAP_FRAME,BASE_FOOT_PRINT);
-        int nav_result = navCore->getMoveBaseActionResult();
+        geometry_msgs::Pose2D currentpose;
+        currentpose = navCore->getCurrentPose(MAP_FRAME,BASE_FOOT_PRINT);
+        // int nav_result = navCore->getMoveBaseActionResult();
         // ROS_INFO("<<<nav_result<<<%d ",nav_result);
+        // if (nav_result == 3){
+        //     ROS_INFO(" $$$$$$$$$$$$$$$$ movebase_result get success");
+        // }
         flag = isArrival(target_pose[type].pose);
         if (flag) {
             resp.nav_flag = true;
@@ -158,10 +178,10 @@ Nav_server::~Nav_server(){
 
 
 bool Nav_server::isArrival(const geometry_msgs::Pose2D &goal2d){
-    navCore->getMoveBaseActionResult();
-    // navCore->action_result_sub
-    // if(navCore->)
-    ROS_INFO("MoveBase");
+    // navCore->getMoveBaseActionResult();
+    // // navCore->action_result_sub
+    // // if(navCore->)
+    // ROS_INFO("MoveBase_result: %d ", );
 
     float thx = 0.1; float tht = 0.05;
     geometry_msgs::Pose2D currentpose;

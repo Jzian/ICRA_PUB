@@ -199,10 +199,19 @@ int main(int argc, char* argv[]){
     // client.call(addints);
     // std::cout<<"response"<<addints.response.sum<<std::endl;
     /////////////////////////////////
-    navi_srv.request.tar_type = targetPose::shopping;
-    bool nav_flag = navigation_client.call(navi_srv);
-    /*
+        // navi_srv.request.tar_type = targetPose::shopping;
+        // bool nav_flag = navigation_client.call(navi_srv);
+    // navi_srv.request.tar_type = 9;
+    // bool nav_flag = navigation_client.call(navi_srv);
+    // if (nav_flag){
+    //     ROS_INFO("set new target");
+    //     navi_srv.request.tar_type = targetPose::shopping;
+    //     bool nav_flag = navigation_client.call(navi_srv);
+    // }
+
+    
     ///////////////  SHOPPING  ////////////////////
+    
     navi_srv.request.tar_type = targetPose::shopping;
     bool nav_flag = navigation_client.call(navi_srv);
     if (nav_flag){
@@ -251,7 +260,7 @@ int main(int argc, char* argv[]){
     if(serving){
         navi_srv.request.tar_type = targetPose::serving;
         navigation_client.call(navi_srv);
-    }   */
+    }   
 
  
 /////////////////////////////////////
