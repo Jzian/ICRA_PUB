@@ -71,6 +71,10 @@ add_executable(navigation src/main.cc)
 add_dependencies(navigation ${PROJECT_NAME}_gencpp)
 target_link_libraries(navigation  navcore ${catkin_LIBRARIES})
 
+add_executable(nav_status src/main_satus.cc)
+add_dependencies(nav_status ${PROJECT_NAME}_gencpp)
+target_link_libraries(nav_status  navcore ${catkin_LIBRARIES})
+
 add_executable(navi_service src/navi_server.cc)
 add_dependencies(navi_service ${PROJECT_NAME}_gencpp)
 target_link_libraries(navi_service jsonlib navcore ${catkin_LIBRARIES})

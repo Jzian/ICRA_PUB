@@ -23,29 +23,49 @@ class Nav_server{
     ros::Subscriber action_result_sub;
     std::string MAP_FRAME , BASE_FOOT_PRINT;
     std::string JSON_FILE;
-    void actionResultCallback(const actionlib_msgs::GoalStatusArray::ConstPtr &msg);
+    int nav_status = 0; 
+    void actionStatusCallback(const actionlib_msgs::GoalStatusArray::ConstPtr &msg);
+    void actionResultCallback(const move_base_msgs::MoveBaseActionResult &msg);
     bool isArrival(const geometry_msgs::Pose2D &goal2d);
 public:
     Nav_server(ros::NodeHandle &nh_, const std::string& base_foot_print, std::string map_frame, std::string json_file);
     ~Nav_server();
 };
-void Nav_server::actionResultCallback(const actionlib_msgs::GoalStatusArray::ConstPtr &msg)
+void Nav_server::actionStatusCallback(const actionlib_msgs::GoalStatusArray::ConstPtr &msg)
 {
-    
     for (const actionlib_msgs::GoalStatus& status : msg->status_list)
     {
-        // ROS_INFO("MoveBase status: %d",status.status);
-        if (status.status ==3)
+        ROS_INFO("MoveBase status: %d",status.status);
+        if (status.status == 3)
         {
-            navCore->moveBaseActionResult_ = NavCore::MoveBaseActionResult::SUCCEEDED;
+            // navCore->moveBaseActionResult_ = NavCore::MoveBaseActionResult::SUCCEEDED;
+            nav_status = 3;
             ROS_INFO("MoveBase status: Goal succeeded");
         }
+        if (status.status == 4)
+        {
+            // navCore->moveBaseActionResult_ = NavCore::MoveBaseActionResult::ABORTED;
+            nav_status = 4
+            ROS_INFO("MoveBase status: Goal aborted");
+        }
+        else nav_status = 0;
     }
-    // std::cout<<"resullllllllllllllt<"<<msg.status.status<<std::endl;
-    // if (msg.status == 3)
-    // {
-    //     ROS_INFO("GOAL!!!!!!!!!!reach!!!!!!!");
-    // }
+
+}
+void Nav_server::actionResultCallback(const move_base_msgs::MoveBaseActionResult &msg)
+{
+    std::cout << "movebase  result" << msg.status.status << std::endl;
+    if (msg.status.status == 3){
+        ROS_INFO("MoveBase result: Goal succeeded");
+        nav_status = 3;
+    }
+    else if (msg.status.status == 4) {
+        ROS_INFO("MoveBase result:  Goal aborted");
+        nav_status = 4;
+    }
+    else {
+        nav_status = 0;
+    }
 }
 
 void Nav_server::readPoseFromJson(std::string type)
@@ -103,55 +123,79 @@ navigation::nav_srv::Response& resp){
     int type = req.tar_type;
 
 
-    // if (type == 9){
-    //     ROS_INFO("in nav 9");
-    //     geometry_msgs::Pose2D pose_ori;
+    if (type == 9){
+        ROS_INFO("in nav 9");
+        geometry_msgs::Pose2D pose_ori;
         
-    //     pose_ori.x = 0;
-    //     pose_ori.y = 0;
-    //     navCore->setGoal(pose_ori);
-    //     loop_rate.sleep();
-    //     resp.nav_flag = true;
-    //     return true;
-    // }
-    // else{
-    //     navCore->setGoal(target_pose[type].pose);
-    //     ROS_INFO("Set pose to x:%d y:%d th:%d:", target_pose[type].pose.x, target_pose[type].pose.y, target_pose[type].pose.theta);
-    // }
-    // if (type == 2){
-    //     if (chdir("/home/hpf/wukong-robot") != 0) {
-    //         std::cerr << "Error changing directory" << std::endl;
-    //     }
-    //     system("./start.sh");
-    // }
+        pose_ori.x = 0.05;
+        pose_ori.y = 0.03;
+        // pose_ori.theta = 0;
+        navCore->setGoal(pose_ori);
+        navCore->cancelAllGoals();
+        loop_rate.sleep();
+        resp.nav_flag = true;
+        resp.tar_string = "origin";
+        return true;
+    }
+
+    if (type == 2){
+        if (chdir("/home/hpf/wukong-robot") != 0) {
+            std::cerr << "Error changing directory" << std::endl;
+        }
+        system("./start.sh");
+    }
+
     navCore->setGoal(target_pose[type].pose);
     bool flag =false;
     while( ros::ok() ){
+        // int nav_result = navCore->getMoveBaseActionResult();
         geometry_msgs::Pose2D currentpose;
         currentpose = navCore->getCurrentPose(MAP_FRAME,BASE_FOOT_PRINT);
-        // int nav_result = navCore->getMoveBaseActionResult();
-        // ROS_INFO("<<<nav_result<<<%d ",nav_result);
-        // if (nav_result == 3){
-        //     ROS_INFO(" $$$$$$$$$$$$$$$$ movebase_result get success");
-        // }
         flag = isArrival(target_pose[type].pose);
-        if (flag) {
+
+        if (nav_status == 4 ) {
+            ROS_INFO("Aborted, reset goal");
+            navCore->setGoal(target_pose[type].pose);
+        }
+        else if (nav_status == 3 || flag){
+            ROS_INFO("  movebase_result get success");
+            flag = false;
             resp.nav_flag = true;
             resp.tar_string = target_type[req.tar_type];
             break;
         }
-        // if (nav_result == NavCore::SUCCEEDED){
-        //     ROS_INFO("getting TARGET point SUCCESSFUL!!!");
 
-        //    resp.nav_flag = true;
-        //    resp.tar_string = target_type[req.tar_type];
-        //     break;
-        // }
         loop_rate.sleep();
-        //todo: else if (failed to get target, ...)
     }
     return true;
 }
+
+// bool Nav_server::doNav(navigation::nav_srv::Request& req,
+// navigation::nav_srv::Response& resp){
+//     ROS_INFO("<<<<<<<<<<<<<<<<<<<<<<<<<in service call");
+//     ros::Rate loop_rate(30);
+//     int type = req.tar_type;
+//     // if (type == 2){
+//     //     if (chdir("/home/hpf/wukong-robot") != 0) {
+//     //         std::cerr << "Error changing directory" << std::endl;
+//     //     }
+//     //     system("./start.sh");
+//     // }
+//     navCore->setGoal(target_pose[type].pose);
+//     bool flag =false;
+//     while( ros::ok() ){
+//         geometry_msgs::Pose2D currentpose;
+//         currentpose = navCore->getCurrentPose(MAP_FRAME,BASE_FOOT_PRINT);
+//         flag = isArrival(target_pose[type].pose);
+//         if (flag) {
+//             resp.nav_flag = true;
+//             resp.tar_string = target_type[req.tar_type];
+//             break;
+//         }
+//         loop_rate.sleep();
+//     }
+//     return true;
+// }
 
 Nav_server::Nav_server(ros::NodeHandle &nh_, const std::string& base_foot_link, std::string map_frame, std::string json_file){
     
@@ -169,7 +213,8 @@ Nav_server::Nav_server(ros::NodeHandle &nh_, const std::string& base_foot_link, 
     navCore = new NavCore(base_foot_link, std::move(map_frame));
     server = nh_.advertiseService("navi_service",&Nav_server::doNav,this);
     test_server = nh_.advertiseService("add",&Nav_server::doadd,this);
-    action_result_sub = nh_.subscribe("/move_base/status", 10, &Nav_server::actionResultCallback,this);
+    action_result_sub = nh_.subscribe("/move_base/status", 10, &Nav_server::actionStatusCallback,this);
+    action_result_sub = nh.subscribe("/move_base/result", 10, &Nav_server::actionResultCallback,this);
 }
 
 Nav_server::~Nav_server(){
@@ -198,7 +243,6 @@ bool Nav_server::isArrival(const geometry_msgs::Pose2D &goal2d){
         return true;
     }
     else return false;
-    
 }
 
 int main(int argc, char *argv[])
@@ -213,4 +257,4 @@ int main(int argc, char *argv[])
     Nav_server nav_server(nh, base_foot_print, map_frame, json_file);
     ROS_INFO("导航服务已经启动....");
     ros::spin();
-}
+}  

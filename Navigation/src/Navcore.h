@@ -45,6 +45,8 @@ private:
     const std::string BASE_FOOT_PRINT_;
     const std::string MAP_FRAME_;
     const std::string FILE_NAME_;
+    mutable boost::shared_mutex action_result_mutex_{};
+
     ros::NodeHandle nh;
     ros::Subscriber action_result_sub;
     MoveBaseClient *moveBaseClient;
@@ -74,7 +76,7 @@ public:
 
     MoveBaseActionResult getMoveBaseActionResult()
     {
-        // boost::unique_lock<boost::shared_mutex> writeLock(action_result_mutex_);
+        boost::unique_lock<boost::shared_mutex> writeLock(action_result_mutex_);
         MoveBaseActionResult temp{moveBaseActionResult_};
         moveBaseActionResult_=MoveBaseActionResult::EMPTY;
         return temp;

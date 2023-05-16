@@ -33,7 +33,7 @@
 
     <node pkg="robot_teleop" type="keyboard_nav.py" name="teleop_twist_keyboard_nav_node" /> 
     
-    <node pkg="navigation" type="navigation" name="navigation"  />
+    <node pkg="navigation" type="navigation" name="navigation"  output="screen"/>
         <!-- <param name="base_foot_print" value="$(arg base_foot_print)" output="screen"/>
         <param name="map_frame" value="$(arg map_frame)" />
         <param name="serial_addr" value="$(arg serial_addr)" /> -->

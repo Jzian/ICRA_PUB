@@ -201,8 +201,8 @@ int main(int argc, char* argv[]){
     /////////////////////////////////
         // navi_srv.request.tar_type = targetPose::shopping;
         // bool nav_flag = navigation_client.call(navi_srv);
-    // navi_srv.request.tar_type = 9;
-    // bool nav_flag = navigation_client.call(navi_srv);
+    navi_srv.request.tar_type = 9;
+    bool nav_flag_origin = navigation_client.call(navi_srv);
     // if (nav_flag){
     //     ROS_INFO("set new target");
     //     navi_srv.request.tar_type = targetPose::shopping;
@@ -230,12 +230,12 @@ int main(int argc, char* argv[]){
             }
         }
     }
-    if (newgoal){
+    if (newgoal) {
         // sleep(2);
         std::cout<<"set new grasp!!!!!!!<<<<<<<<"<<std::endl;
         navi_srv.request.tar_type = targetPose::shopping;
         bool nav_flag = navigation_client.call(navi_srv);
-        if (nav_flag){
+        if (nav_flag) {
             arx_srv.request.mode = GraspMode::Grasp_seasoning;
             bool flag_grasp = arx_client.call(arx_srv);
             if (flag_grasp){

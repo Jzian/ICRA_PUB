@@ -16,7 +16,7 @@ NavCore::NavCore(std::string base_foot_print,std::string map_frame):BASE_FOOT_PR
     client =nh.serviceClient<std_srvs::Empty>("clear_costmaps");
     
     // action_result_sub = nh.subscribe("/move_base/status", 1, &NavCore::actionResultCallback,this);
-    action_result_sub = nh.subscribe("/move_base/result", 11, &NavCore::actionResultCallback,this);
+    action_result_sub = nh.subscribe("/move_base/result", 10, &NavCore::actionResultCallback,this);
     // ros::Subscriber sub = nh.subscribe("/move_base/status", 10, statusCallback);
 }
 NavCore::~NavCore()
@@ -53,7 +53,9 @@ NavCore::~NavCore()
 void NavCore::actionResultCallback(const move_base_msgs::MoveBaseActionResult &msg)
 // void NavCore::actionResultCallback(const actionlib_msgs::GoalStatusArray::ConstPtr &msg)
 {
-    // boost::unique_lock<boost::shared_mutex> writeLock(action_result_mutex_);
+    boost::unique_lock<boost::shared_mutex> writeLock(action_result_mutex_);
+    std::cout << "movebase  result" << msg.status.status << std::endl;
+    
     switch (msg.status.status)
     {
         case move_base_msgs::MoveBaseActionResult::_status_type::PENDING:
