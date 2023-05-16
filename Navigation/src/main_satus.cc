@@ -64,8 +64,8 @@ int main(int argc, char* argv[]){
     {
     case NavMode::Go_Shoping_place:
         ROS_INFO("############### Go_Shoping_place #################");
-        // navi_srv.request.tar_type = targetPose::shopping;
-        // nav_flag = navigation_client.call(navi_srv);
+        navi_srv.request.tar_type = targetPose::shopping;
+        nav_flag = navigation_client.call(navi_srv);
         nav_flag = true;
         if (nav_flag) {
             ROS_INFO("############### Grasp bottle ID%d #################", grasp_mode);
@@ -80,8 +80,8 @@ int main(int argc, char* argv[]){
         break;
     case NavMode::Go_Cooking_place:
         ROS_INFO("############### Go_Cooking_place #################");
-        // navi_srv.request.tar_type = targetPose::cooking;
-        // nav_flag = navigation_client.call(navi_srv);
+        navi_srv.request.tar_type = targetPose::cooking;
+        nav_flag = navigation_client.call(navi_srv);
         nav_flag = true;
 
         if (nav_flag) {
