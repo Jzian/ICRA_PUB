@@ -25,7 +25,7 @@ const std::string pcd_format = ".pcd";
 nav_msgs::OccupancyGrid map_topic_msg;
 
 double thre_z_min = -0.3;
-double thre_z_max = 0.5;
+double thre_z_max = 0.8;
 int flag_pass_through = 0;
 
 double grid_x = 0.1;
@@ -64,11 +64,11 @@ int main(int argc, char** argv)
    pcd_file = file_directory + file_name + pcd_format;
    ROS_INFO("*** pcd_file = %s ***\n", pcd_file.c_str());
 
-   private_nh.param("thre_z_min", thre_z_min, 0.6);
-   private_nh.param("thre_z_max", thre_z_max, 0.7);
+   private_nh.param("thre_z_min", thre_z_min, 0.01);
+   private_nh.param("thre_z_max", thre_z_max, 1.0);
    private_nh.param("flag_pass_through", flag_pass_through, 0);
-   private_nh.param("grid_x", grid_x, 0.1);
-   private_nh.param("grid_y", grid_y, 0.1);
+   private_nh.param("grid_x", grid_x, 0.05);
+   private_nh.param("grid_y", grid_y, 0.05);
    private_nh.param("grid_z", grid_z, 0.1);
    private_nh.param("thre_radius", thre_radius, 0.5);
    private_nh.param("map_resolution", map_resolution, 0.05);

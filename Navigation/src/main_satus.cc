@@ -6,6 +6,7 @@
 // #include <json/json.h>
 // #include <ctime>
 #include "navigation/nav_srv.h"
+#include "navigation/lcm_srv.h"
 #include "navigation/ints.h"
 #include "navigation/arx5_grasp.h"
 #include <unistd.h>
@@ -40,15 +41,20 @@ int main(int argc, char* argv[]){
     ros::Rate loop_rate(30);
     navigation::nav_srv navi_srv;
     navigation::arx5_grasp arx_srv;
+    navigation::lcm_srv lcm_srv;
+
     navigation::ints addints;
     ros::ServiceClient navigation_client = nh_.serviceClient<navigation::nav_srv>("navi_service");
     ros::ServiceClient arx_client = nh_.serviceClient<navigation::arx5_grasp>("arx_server");
+    ros::ServiceClient lcm_client = nh_.serviceClient<navigation::lcm_srv>("lcm_server");
 
     bool serving{false};
-    // ros::service::waitForService("navi_service");
-    // ROS_INFO("#################### NAVI Server is already #####################");
+    ros::service::waitForService("navi_service");
+    ROS_INFO("#################### NAVI Server is already #####################");
     ros::service::waitForService("arx_server");
     ROS_INFO("#################### arx_server is already #####################");
+    ros::service::waitForService("lcm_server");
+    ROS_INFO("#################### lcm_server is already #####################");
 
     int nav_mode  = NavMode::Go_Shoping_place;
     int grasp_mode = 0;
@@ -56,7 +62,7 @@ int main(int argc, char* argv[]){
     bool nav_flag{false};
     bool flag_grasp{false};
     bool flag_put{false};
-
+    bool all_done(false);
 
     while (ros::ok())
 {
@@ -66,7 +72,6 @@ int main(int argc, char* argv[]){
         ROS_INFO("############### Go_Shoping_place #################");
         navi_srv.request.tar_type = targetPose::shopping;
         nav_flag = navigation_client.call(navi_srv);
-        nav_flag = true;
         if (nav_flag) {
             ROS_INFO("############### Grasp bottle ID%d #################", grasp_mode);
             arx_srv.request.mode = grasp_mode;
@@ -82,8 +87,6 @@ int main(int argc, char* argv[]){
         ROS_INFO("############### Go_Cooking_place #################");
         navi_srv.request.tar_type = targetPose::cooking;
         nav_flag = navigation_client.call(navi_srv);
-        nav_flag = true;
-
         if (nav_flag) {
             ROS_INFO("############### Put bottle ID%d #################", put_mode);
             arx_srv.request.mode = put_mode;
@@ -94,11 +97,22 @@ int main(int argc, char* argv[]){
                 nav_mode = NavMode::Go_Shoping_place;
             }
         }
+        if(grasp_mode > 4) {
+            nav_mode = NavMode::Go_Serving_place;
+        }
         break;
+    case NavMode::Go_Serving_place:
+        ROS_INFO("############### Go_Serving_place #################");
+        lcm_srv.request.enable = true;
+        lcm_client.call(lcm_srv);
+        if (lcm_srv.response.cook_done) {
+            navi_srv.request.tar_type = targetPose::serving;
+            all_done = navigation_client.call(navi_srv);
+        }
     default:
         break;
     }
-    if(grasp_mode > 4) break;
+    if(all_done) break;
     loop_rate.sleep();
 }
     /*

@@ -41,6 +41,7 @@ add_service_files(
   nav_srv.srv
   ints.srv
   arx5_grasp.srv
+  lcm_srv.srv
 )
 
 generate_messages(
@@ -53,6 +54,12 @@ catkin_package(
   CATKIN_DEPENDS geometry_msgs nav_msgs roscpp rospy std_msgs message_runtime nav_msgs tf
   DEPENDS EIGEN3 PCL
   INCLUDE_DIRS
+)
+
+catkin_install_python(PROGRAMS
+  src/lcm_server.py
+  src/exlcm/example_t.py
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
 add_library(navcore src/Navcore.cc)
@@ -78,4 +85,5 @@ target_link_libraries(nav_status  navcore ${catkin_LIBRARIES})
 add_executable(navi_service src/navi_server.cc)
 add_dependencies(navi_service ${PROJECT_NAME}_gencpp)
 target_link_libraries(navi_service jsonlib navcore ${catkin_LIBRARIES})
+
 

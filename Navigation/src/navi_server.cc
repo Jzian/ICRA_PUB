@@ -13,7 +13,7 @@ class Nav_server{
     std::vector<std::string> target_type = {"shopping", "cooking", "serving"};
     std::vector<targetPose> target_pose;
     NavCore* navCore;
-    
+    geometry_msgs::Pose2D lastpose;
     bool new_goal{true};
     void readPoseFromJson(std::string);
     bool doNav(navigation::nav_srv::Request& req,navigation::nav_srv::Response& resp);
@@ -45,7 +45,7 @@ void Nav_server::actionStatusCallback(const actionlib_msgs::GoalStatusArray::Con
         if (status.status == 4)
         {
             // navCore->moveBaseActionResult_ = NavCore::MoveBaseActionResult::ABORTED;
-            nav_status = 4
+            nav_status = 4;
             ROS_INFO("MoveBase status: Goal aborted");
         }
         else nav_status = 0;
@@ -118,53 +118,69 @@ navigation::ints::Response& resp){
 
 bool Nav_server::doNav(navigation::nav_srv::Request& req,
 navigation::nav_srv::Response& resp){
-    ROS_INFO("<<<<<<<<<<<<<<<<<<<<<<<<<in service call");
-    ros::Rate loop_rate(30);
     int type = req.tar_type;
+    ROS_INFO("<<<<<<<<<<<<<<<<<<<<<<<<<in service call,set %d", type);
+    ros::Rate loop_rate(30);
+    
 
 
-    if (type == 9){
-        ROS_INFO("in nav 9");
-        geometry_msgs::Pose2D pose_ori;
+    // if (type == 9){
+    //     ROS_INFO("in nav 9");
+    //     geometry_msgs::Pose2D pose_ori;
         
-        pose_ori.x = 0.05;
-        pose_ori.y = 0.03;
-        // pose_ori.theta = 0;
-        navCore->setGoal(pose_ori);
-        navCore->cancelAllGoals();
-        loop_rate.sleep();
-        resp.nav_flag = true;
-        resp.tar_string = "origin";
-        return true;
-    }
+    //     pose_ori.x = 0.05;
+    //     pose_ori.y = 0.03;
+    //     // pose_ori.theta = 0;
+    //     navCore->setGoal(pose_ori);
+    //     navCore->cancelAllGoals();
+    //     loop_rate.sleep();
+    //     resp.nav_flag = true;
+    //     resp.tar_string = "origin";
+    //     return true;
+    // }
 
     if (type == 2){
-        if (chdir("/home/hpf/wukong-robot") != 0) {
+        if (chdir("$HOME/wukong-robot") != 0) {
             std::cerr << "Error changing directory" << std::endl;
         }
         system("./start.sh");
     }
-
+    
     navCore->setGoal(target_pose[type].pose);
+    ROS_INFO("set goal %d", type);
     bool flag =false;
+    double ab_d = 0.001;
+    int aborted_idx = 0;
     while( ros::ok() ){
         // int nav_result = navCore->getMoveBaseActionResult();
         geometry_msgs::Pose2D currentpose;
         currentpose = navCore->getCurrentPose(MAP_FRAME,BASE_FOOT_PRINT);
         flag = isArrival(target_pose[type].pose);
 
-        if (nav_status == 4 ) {
+        // if (nav_status == 4 ) {
+        //     ROS_INFO("Aborted, reset goal");
+        //     navCore->setGoal(target_pose[type].pose);
+        // }
+        double ab_x = std::abs(currentpose.x - lastpose.x);
+        double ab_y = std::abs(currentpose.y - lastpose.y);
+        double ab_th = std::abs(currentpose.theta - lastpose.theta);
+        if (ab_x < ab_d && ab_y < ab_d && ab_th < ab_d) {
+            aborted_idx++;
+            ROS_INFO("aborted_idx: %d", aborted_idx);
+        }
+        if(aborted_idx > 100) {
             ROS_INFO("Aborted, reset goal");
+            aborted_idx = 0;
             navCore->setGoal(target_pose[type].pose);
         }
-        else if (nav_status == 3 || flag){
+        else if (flag){
             ROS_INFO("  movebase_result get success");
             flag = false;
             resp.nav_flag = true;
             resp.tar_string = target_type[req.tar_type];
             break;
         }
-
+        lastpose = currentpose;
         loop_rate.sleep();
     }
     return true;
@@ -213,8 +229,8 @@ Nav_server::Nav_server(ros::NodeHandle &nh_, const std::string& base_foot_link, 
     navCore = new NavCore(base_foot_link, std::move(map_frame));
     server = nh_.advertiseService("navi_service",&Nav_server::doNav,this);
     test_server = nh_.advertiseService("add",&Nav_server::doadd,this);
-    action_result_sub = nh_.subscribe("/move_base/status", 10, &Nav_server::actionStatusCallback,this);
-    action_result_sub = nh.subscribe("/move_base/result", 10, &Nav_server::actionResultCallback,this);
+    // action_result_sub = nh_.subscribe("/move_base/status", 10, &Nav_server::actionStatusCallback,this);
+    // action_result_sub = nh_.subscribe("/move_base/result", 10, &Nav_server::actionResultCallback,this);
 }
 
 Nav_server::~Nav_server(){
@@ -223,25 +239,23 @@ Nav_server::~Nav_server(){
 
 
 bool Nav_server::isArrival(const geometry_msgs::Pose2D &goal2d){
-    // navCore->getMoveBaseActionResult();
-    // // navCore->action_result_sub
-    // // if(navCore->)
-    // ROS_INFO("MoveBase_result: %d ", );
 
-    float thx = 0.1; float tht = 0.05;
+    float thx = 0.1; float tht = 0.03;
     geometry_msgs::Pose2D currentpose;
+    geometry_msgs::Pose2D lastpose;
     currentpose = navCore->getCurrentPose(MAP_FRAME,BASE_FOOT_PRINT);
-    // std::cout << "current pose: " << currentpose.x << currentpose.y <<currentpose.theta<<std::endl;
-    // std::cout << "goal2d pose: " << goal2d.x << goal2d.y <<goal2d.theta<<std::endl;
+
     float dx = std::abs(currentpose.x - goal2d.x);
     float dy = std::abs(currentpose.y - goal2d.y);
     float dth = std::abs(currentpose.theta - goal2d.theta);
     // std::cout << " pose error: " << dx << dy <<dth<<std::endl;
+    lastpose = currentpose;
     if (dx+dy < thx &&  dth < tht){
         ROS_INFO("Goal is Arrival!!!");
         navCore->cancelAllGoals();
         return true;
     }
+    
     else return false;
 }
 
