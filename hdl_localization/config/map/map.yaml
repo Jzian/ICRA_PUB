@@ -1,6 +1,6 @@
 image: /home/hpf/ICRA_PUB/src/hdl_localization/config/map/map.pgm
 resolution: 0.050000
-origin: [-3.714828, -2.489728, 0.000000]
+origin: [-6.987378, -4.716821, 0.000000]
 negate: 0
 occupied_thresh: 0.65
 free_thresh: 0.196

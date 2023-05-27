@@ -140,7 +140,7 @@ navigation::nav_srv::Response& resp){
     // }
 
     if (type == 2){
-        if (chdir("$HOME/wukong-robot") != 0) {
+        if (chdir("/home/hpf/wukong-robot") != 0) {
             std::cerr << "Error changing directory" << std::endl;
         }
         system("./start.sh");
@@ -166,9 +166,9 @@ navigation::nav_srv::Response& resp){
         double ab_th = std::abs(currentpose.theta - lastpose.theta);
         if (ab_x < ab_d && ab_y < ab_d && ab_th < ab_d) {
             aborted_idx++;
-            ROS_INFO("aborted_idx: %d", aborted_idx);
+            // ROS_INFO("aborted_idx: %d", aborted_idx);
         }
-        if(aborted_idx > 100) {
+        if(aborted_idx > 200) {
             ROS_INFO("Aborted, reset goal");
             aborted_idx = 0;
             navCore->setGoal(target_pose[type].pose);

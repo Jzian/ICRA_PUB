@@ -128,34 +128,34 @@ void ControlTeleop::JoyCallback(const sensor_msgs::JoyConstPtr &msg) {
         }
       }
     } else {
-      if (msg->axes[0] || msg->axes[1] || msg->axes[2] != 1 ||
-          msg->axes[5] != 1) {
+      if (msg->axes[0] || msg->axes[1]) {
         vel.linear.y = msg->axes[0] * max_linear_velocity_;
         vel.linear.x = msg->axes[1] * max_linear_velocity_;
         vel.angular.z =
-            (-msg->axes[2] + msg->axes[5]) * max_angular_velocity_ / 2;
-        if (msg->axes[3] || msg->axes[4]) {
-          vel.linear.y = msg->axes[0] * max_linear_velocity_ +
-                         msg->axes[3] * max_linear_velocity_ / 2.0;
-          vel.linear.x = msg->axes[1] * max_linear_velocity_ +
-                         msg->axes[4] * max_linear_velocity_ / 2.0;
-          vel.angular.z =
-              (-msg->axes[2] + msg->axes[5]) * max_angular_velocity_ / 2;
-        }
-      } else if (msg->axes[3] || msg->axes[4]) {
-        vel.linear.y = msg->axes[3] * max_linear_velocity_ / 2.0;
-        vel.linear.x = msg->axes[4] * max_linear_velocity_ / 2.0;
-        vel.angular.z =
-            (-msg->axes[2] + msg->axes[5]) * max_angular_velocity_ / 2;
-        if (msg->axes[0] || msg->axes[1]) {
-          vel.linear.y = msg->axes[0] * max_linear_velocity_ +
-                         msg->axes[3] * max_linear_velocity_ / 2.0;
-          vel.linear.x = msg->axes[1] * max_linear_velocity_ +
-                         msg->axes[4] * max_linear_velocity_ / 2.0;
-          vel.angular.z =
-              (-msg->axes[2] + msg->axes[5]) * max_angular_velocity_ / 2;
-        }
-      }
+            (-msg->axes[4] + msg->axes[5]) * max_angular_velocity_ / 2;
+        // if (msg->axes[3] || msg->axes[4]) {
+        //   vel.linear.y = msg->axes[0] * max_linear_velocity_ +
+        //                  msg->axes[3] * max_linear_velocity_ / 2.0;
+        //   vel.linear.x = msg->axes[1] * max_linear_velocity_ +
+        //                  msg->axes[4] * max_linear_velocity_ / 2.0;
+        //   vel.angular.z =
+        //       (-msg->axes[2] + msg->axes[5]) * max_angular_velocity_ / 2;
+        // }
+      } 
+      // else if (msg->axes[3] || msg->axes[4]) {
+      //   vel.linear.y = msg->axes[3] * max_linear_velocity_ / 2.0;
+      //   vel.linear.x = msg->axes[4] * max_linear_velocity_ / 2.0;
+      //   vel.angular.z =
+      //       (-msg->axes[2] + msg->axes[5]) * max_angular_velocity_ / 2;
+      //   if (msg->axes[0] || msg->axes[1]) {
+      //     vel.linear.y = msg->axes[0] * max_linear_velocity_ +
+      //                    msg->axes[3] * max_linear_velocity_ / 2.0;
+      //     vel.linear.x = msg->axes[1] * max_linear_velocity_ +
+      //                    msg->axes[4] * max_linear_velocity_ / 2.0;
+      //     vel.angular.z =
+      //         (-msg->axes[2] + msg->axes[5]) * max_angular_velocity_ / 2;
+      //   }
+      // }
     }
     joy_vel_pub.publish(vel);
   }
